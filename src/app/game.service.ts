@@ -30,16 +30,23 @@ export class GameService {
     constructor(private _HttpClient : HttpClient, private _UrlService:UrlService) { 
 
     }
+    
+    getCommonMap() : any {
+        return {
+            sessionId : this.sessionId,
+            playerId : this.playerId
+        };
+    }
 
     getGameByPlayer(playerId:string) : Observable<any> {
-        return this._HttpClient.get(this._UrlService.getGetGameByPlayerUrl() + "/" +playerId);
+        return this._HttpClient.get(this._UrlService.getGetGameByPlayerUrl() + "/" +playerId, this.getCommonMap());
     }
 
     saveNewGame(playerId:string) : Observable<any> {
-        return this._HttpClient.post(this._UrlService.getSaveNewGameUrl() + "/" +playerId, {});
+        return this._HttpClient.post(this._UrlService.getSaveNewGameUrl() + "/" +playerId, this.getCommonMap());
     }
 
     playTurn(playerId:string) : Observable<any> {
-        return this._HttpClient.post(this._UrlService.getTurnUrl() + "/" +playerId, {});
+        return this._HttpClient.post(this._UrlService.getTurnUrl() + "/" +playerId, this.getCommonMap());
     }
 }

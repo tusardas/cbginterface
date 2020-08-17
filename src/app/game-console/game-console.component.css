@@ -1,0 +1,57 @@
+.cardSection {
+    clear: both;
+}
+ul.myCards > li {
+    list-style: none;
+    float: left;
+    margin: 2px 10px 2px 10px;
+}
+
+ul.myCards > li > a > img {
+    width: 80px;
+    height: 100px;
+}
+
+.placedCards {
+    clear: both;
+    margin: 10px auto;
+    width: 90%;
+    height: 200px;
+    border: 1px dashed #ccc;
+    text-align: center;
+}
+
+.myCard {
+    float: left;
+    width: 20%;
+    height: 100%;
+    
+    margin: 0px 0px 0px 27.3%;
+}
+.divider {
+    padding: 90px 20px;
+    float: left;
+    width: 20px;
+}
+.hisCard {
+    float: left;
+    width: 20%;
+    height: 100%;
+    
+}
+
+.myCard > img, .hisCard > img {
+    width: 120px;
+    height: 140px;
+    margin: 30px auto;
+}
+
+.myCard > span, .hisCard > span {
+    padding: 80px 0px 0px;
+    display: inline-block;
+}
+
+.gameButtons {
+    clear: both;
+    text-align: center;
+}

@@ -1,1 +1,49 @@
-<p>game-console works!</p>
+<div>
+    
+    <div *ngIf="isGameLoaded; then gameBlock; else gameStartBlock "></div>
+    <ng-template #gameBlock>
+        <div>
+            <div class="cardSection">
+                <ul class="myCards" *ngFor="let cardReserve of game.gamePlayers[0].cardReserves">
+                    <li>
+                        <a href="javascript:void(0);" (click)="selectCard(cardReserve)">
+                            <img src="http://localhost:8888/images/cards/{{getFile(cardReserve)}}"/>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <div class="placedCards">
+                <div class="myCard">
+                    <div *ngIf="isMyCardReserveSelected; then myCardReserveBlock; else thinkingBlock"></div>
+                    <ng-template #myCardReserveBlock>
+                        <img src="http://localhost:8888/images/cards/{{getFile(myCardReserve)}}"/>
+                    </ng-template>
+                    <ng-template #thinkingBlock>
+                        <span>Thinking...</span>
+                    </ng-template>
+                </div>
+                <div class="divider">VS</div>
+                <div class="hisCard">
+                    <div *ngIf="isHisCardReserveSelected; then hisCardReserveBlock; else heThinkingBlock"></div>
+                    <ng-template #hisCardReserveBlock>
+                        <img src="http://localhost:8888/images/cards/{{getFile(hisCardReserve)}}"/>
+                    </ng-template>
+                    <ng-template #heThinkingBlock>
+                        <span>Thinking...</span>
+                    </ng-template>
+                </div>
+            </div>
+            <div class="gameButtons">
+                <button (click)="playTurn()">Play Turn</button>
+            </div>
+        </div>
+    </ng-template>
+    <ng-template #gameStartBlock>
+        <div>
+            <button (click)="saveNewGame()">New Game</button>
+        </div>
+    </ng-template>
+    
+</div>
+
+

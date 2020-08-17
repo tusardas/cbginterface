@@ -19,5 +19,7 @@ const routes: Routes = [
 export class AppRoutingModule { }
 export const rountingComponents = [
     LoginComponent,
-    GameConsoleComponent
+    GameConsoleComponent,
+    PageNotFoundComponent
+
 ];

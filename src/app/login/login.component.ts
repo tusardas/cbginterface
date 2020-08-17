@@ -16,12 +16,12 @@ export class LoginComponent implements OnInit {
 
   }
 
-  private errMsg:String;
+  public errMsg:String;
   public messageClasses = {
       "error" : this.errMsg != ''
   }
-  private email:String;
-  private password:String;
+  public email:String;
+  public password:String;
 
   ngOnInit(): void {
   }
