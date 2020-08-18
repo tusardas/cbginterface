@@ -9,8 +9,11 @@ import { GameService } from '../game.service';
 export class GameConsoleComponent implements OnInit {
     public playerId:string;
     public game;
+    public cardReserves;
+    public gameStatus;
     public isGameLoaded:Boolean = false;
-    
+    public nextPlayerId;
+
     public isMyCardReserveSelected:Boolean = false;
     public myCardReserve;
 
@@ -39,6 +42,9 @@ export class GameConsoleComponent implements OnInit {
         if(game.id) {
             console.log("inside ------>");
             this.game = game;
+            this.cardReserves = game.gamePlayers.find(gamePlayer => gamePlayer.player.id == this.playerId).cardReserves;
+            this.gameStatus = game.gameState.gameStatus;
+            this.nextPlayerId = game.gameState.nextPlayerId;
             this.isGameLoaded = true;
         }
         console.log("game -------> " + this.game.id);
@@ -53,7 +59,22 @@ export class GameConsoleComponent implements OnInit {
     }
 
     playTurn() : void {
-
+        if(this.gameStatus !=3 && this.nextPlayerId == this.playerId) {
+            if(this.myCardReserve != undefined) {
+                let myCardAttribute = this.myCardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "odi_runs");
+                this._GameService.playTurn(this.playerId, this.myCardReserve, myCardAttribute)
+                    .subscribe(
+                        data => this.loadGame(data),
+                        error => console.log(error)
+                    );
+            }
+            else {
+                this.showError("Please select your card first!");
+            }
+        }
+        else {
+            this.showError("Please wait for your turn!");
+        }
     }
 
     getFile(cardReserve:any) : string {
@@ -64,12 +85,21 @@ export class GameConsoleComponent implements OnInit {
     }
 
     selectCard(cardReserve:any) : string {
-        console.log("cardReserve ----> " + cardReserve);
-        var fileName = cardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "file").attributeValue;
-        console.log("fileName ----> " + fileName);
-        this.myCardReserve = cardReserve;
-        this.isMyCardReserveSelected = true;
-        return fileName;
+        if(this.gameStatus !=3 && this.nextPlayerId == this.playerId) {
+            console.log("cardReserve ----> " + cardReserve);
+            var fileName = cardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "file").attributeValue;
+            console.log("fileName ----> " + fileName);
+            this.myCardReserve = cardReserve;
+            this.isMyCardReserveSelected = true;
+            return fileName;
+        }
+        else {
+            this.showError("Please wait for your turn!");
+        }
+    }
+
+    showError(errorMsg:string) : void {
+        alert(errorMsg);
     }
 
 }

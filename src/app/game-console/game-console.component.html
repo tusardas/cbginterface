@@ -4,7 +4,7 @@
     <ng-template #gameBlock>
         <div>
             <div class="cardSection">
-                <ul class="myCards" *ngFor="let cardReserve of game.gamePlayers[0].cardReserves">
+                <ul class="myCards" *ngFor="let cardReserve of cardReserves">
                     <li>
                         <a href="javascript:void(0);" (click)="selectCard(cardReserve)">
                             <img src="http://localhost:8888/images/cards/{{getFile(cardReserve)}}"/>
@@ -19,7 +19,13 @@
                         <img src="http://localhost:8888/images/cards/{{getFile(myCardReserve)}}"/>
                     </ng-template>
                     <ng-template #thinkingBlock>
-                        <span>Thinking...</span>
+                        <span *ngIf="(gameStatus !=3 && nextPlayerId == playerId); then thinking; else waiting"></span>
+                        <ng-template #thinking>
+                            <span>Im' Thinking...</span>
+                        </ng-template>
+                        <ng-template #waiting>
+                            <span>I'm Waiting...</span>
+                        </ng-template>
                     </ng-template>
                 </div>
                 <div class="divider">VS</div>
@@ -29,7 +35,13 @@
                         <img src="http://localhost:8888/images/cards/{{getFile(hisCardReserve)}}"/>
                     </ng-template>
                     <ng-template #heThinkingBlock>
-                        <span>Thinking...</span>
+                        <span *ngIf="(gameStatus !=3 && nextPlayerId != playerId); then hethinking; else hewaiting"></span>
+                        <ng-template #hethinking>
+                            <span>He's Thinking...</span>
+                        </ng-template>
+                        <ng-template #hewaiting>
+                            <span>He's Waiting...</span>
+                        </ng-template>
                     </ng-template>
                 </div>
             </div>

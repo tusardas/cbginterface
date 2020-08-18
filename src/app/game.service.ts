@@ -46,7 +46,10 @@ export class GameService {
         return this._HttpClient.post(this._UrlService.getSaveNewGameUrl() + "/" +playerId, this.getCommonMap());
     }
 
-    playTurn(playerId:string) : Observable<any> {
-        return this._HttpClient.post(this._UrlService.getTurnUrl() + "/" +playerId, this.getCommonMap());
+    playTurn(playerId:string, cardReserve:any, cardAttribute:any) : Observable<any> {
+        let turnMap = this.getCommonMap();
+        turnMap['cardReserve'] = cardReserve;
+        turnMap['cardAttribute'] = cardAttribute;
+        return this._HttpClient.post(this._UrlService.getTurnUrl() + "/" +playerId, turnMap);
     }
 }
