@@ -45,9 +45,17 @@
                     </ng-template>
                 </div>
             </div>
-            <div class="gameButtons">
-                <button (click)="playTurn()">Play Turn</button>
-            </div>
+            <div *ngIf="(gameStatus !=3 && nextPlayerId == playerId); then canPlay; else cannotPlay"></div>
+            <ng-template #canPlay>
+                <div class="gameButtons">
+                    <button (click)="playTurn()">Play Turn</button>
+                </div>
+            </ng-template>
+            <ng-template #cannotPlay>
+                <div class="gameButtons">
+                    Please wait for your turn
+                </div>
+            </ng-template>
         </div>
     </ng-template>
     <ng-template #gameStartBlock>

@@ -39,7 +39,9 @@ export class GameService {
     }
 
     getGameByPlayer(playerId:string) : Observable<any> {
-        return this._HttpClient.get(this._UrlService.getGetGameByPlayerUrl() + "/" +playerId, this.getCommonMap());
+        console.log("----> " + this.getCommonMap().sessionId);
+        console.log("----> " + this.getCommonMap().playerId);
+        return this._HttpClient.post(this._UrlService.getGetGameByPlayerUrl() + "/" +playerId, this.getCommonMap());
     }
 
     saveNewGame(playerId:string) : Observable<any> {

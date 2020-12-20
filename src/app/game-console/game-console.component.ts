@@ -37,14 +37,17 @@ export class GameConsoleComponent implements OnInit {
             );
     }
 
-    loadGame(game:any) : void {
-        console.log("here -------> " + game.id);
+    loadGame(responseData:any) : void {
+        let game = responseData.game;
+        let turn = responseData.turn;
+        console.log("game -------> " + game.id);
+        console.log("turn -------> " + turn.id);
         if(game.id) {
             console.log("inside ------>");
             this.game = game;
             this.cardReserves = game.gamePlayers.find(gamePlayer => gamePlayer.player.id == this.playerId).cardReserves;
             this.gameStatus = game.gameState.gameStatus;
-            this.nextPlayerId = game.gameState.nextPlayerId;
+            this.nextPlayerId = turn.nextPlayerId;
             this.isGameLoaded = true;
         }
         console.log("game -------> " + this.game.id);

@@ -22,7 +22,7 @@ export class UrlService {
   }
 
   public getSaveNewGameUrl() : string {
-    return this.serverUrl + "/saveNewGameUrl";
+    return this.serverUrl + "/saveNewGame";
   }
 
   public getTurnUrl() : string {
