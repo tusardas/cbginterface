@@ -28,5 +28,9 @@ export class UrlService {
   public getTurnUrl() : string {
     return this.serverUrl + "/turn";
   }
+
+  public getFileUrl() : string {
+    return this.serverUrl + "/images/cards"
+  }
   
 }

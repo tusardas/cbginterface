@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { GameService } from '../game.service';
+import { UrlService } from '../url.service';
 
 @Component({
   selector: 'app-game-console',
@@ -9,24 +10,22 @@ import { GameService } from '../game.service';
 export class GameConsoleComponent implements OnInit {
     public playerId:string;
     public game;
-    public cardReserves;
-    public gameStatus;
+    public round;
+    public turns;
+    public cardReservesPlayable;
+    public cardReservesJustWon;
+    public fileUrl:string = "";
     public isGameLoaded:Boolean = false;
-    public nextPlayerId;
-
-    public isMyCardReserveSelected:Boolean = false;
     public myCardReserve;
 
-    public isHisCardReserveSelected:Boolean = false;
-    public hisCardReserve;
-
-  constructor(private _GameService : GameService) { 
+  constructor(private _GameService : GameService, private _UrlService:UrlService) { 
 
   }
 
     ngOnInit(): void {
         this.playerId = this._GameService.getPlayerId();
         this.checkIfGameExists();
+        this.fileUrl = this._UrlService.getFileUrl();
     }
 
     checkIfGameExists() : void{ 
@@ -39,30 +38,46 @@ export class GameConsoleComponent implements OnInit {
 
     loadGame(responseData:any) : void {
         let game = responseData.game;
-        let turn = responseData.turn;
-        console.log("game -------> " + game.id);
-        console.log("turn -------> " + turn.id);
-        if(game.id) {
-            console.log("inside ------>");
+        let round = responseData.round;
+        //console.log("game -------> " + game.id);
+        //console.log("round -------> " + round.id);
+        if(game.id && round.id) {
+            //console.log("inside ------>");
             this.game = game;
-            this.cardReserves = game.gamePlayers.find(gamePlayer => gamePlayer.player.id == this.playerId).cardReserves;
-            this.gameStatus = game.gameState.gameStatus;
-            this.nextPlayerId = turn.nextPlayerId;
+            this.round = round;
+            this.turns = round.turns;
+
+            let cardReserves = game.gamePlayers.find(gamePlayer => gamePlayer.player.id == this.playerId).cardReserves;
+            this.cardReservesPlayable = this.filterCardReserves(cardReserves, 1);
+            //console.log("useable -----> " + this.cardReservesPlayable);
+            this.cardReservesJustWon = this.filterCardReserves(cardReserves, 2);
+            //console.log("justWon -----> " + this.cardReservesJustWon);
+            
             this.isGameLoaded = true;
         }
-        console.log("game -------> " + this.game.id);
+        //console.log("game -------> " + this.game.id);
+    }
+
+    filterCardReserves(cardReserves:any, reserveType:any) : any {
+        var finalArray = [];
+        for(let i=0 ; i<cardReserves.length; i++) {
+            if(reserveType === cardReserves[i].reserveType){
+                finalArray.push(cardReserves[i]);
+            }
+        }
+        return finalArray;
     }
 
     saveNewGame() : void {
         this._GameService.saveNewGame(this.playerId)
-            .subscribe(
-                data => this.loadGame(data),
-                error => console.log(error)
-            );
+        .subscribe(
+            data => this.loadGame(data),
+            error => console.log(error)
+        );
     }
 
     playTurn() : void {
-        if(this.gameStatus !=3 && this.nextPlayerId == this.playerId) {
+        if(this.game.gameStatus !=3 && this.round.nextPlayerId == this.playerId) {
             if(this.myCardReserve != undefined) {
                 let myCardAttribute = this.myCardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "odi_runs");
                 this._GameService.playTurn(this.playerId, this.myCardReserve, myCardAttribute)
@@ -81,19 +96,36 @@ export class GameConsoleComponent implements OnInit {
     }
 
     getFile(cardReserve:any) : string {
-        console.log("cardReserve ----> " + cardReserve);
+        //console.log("cardReserve ----> " + cardReserve);
         var fileName = cardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "file").attributeValue;
-        console.log("fileName ----> " + fileName);
+        //console.log("fileName ----> " + fileName);
         return fileName;
     }
 
+    getFileByTurn(turn:any) {
+        let cardReserveForTurn;
+        let gamePlayers = this.game.gamePlayers;
+        for(let i = 0; i<gamePlayers.length(); i++) {
+            let cardReserves = gamePlayers[i].cardReserves;
+            for(let j=0; cardReserves.length; j++) {
+                if(cardReserves[j].card.id == turn.cardId) {
+                    cardReserveForTurn = cardReserves[j];
+                    break;
+                }
+            }
+            if(cardReserveForTurn != undefined) {
+                break;
+            }
+        }
+        return this.getFile(cardReserveForTurn);
+    }
+
     selectCard(cardReserve:any) : string {
-        if(this.gameStatus !=3 && this.nextPlayerId == this.playerId) {
-            console.log("cardReserve ----> " + cardReserve);
+        if(this.game.gameStatus !=3 && this.round.nextPlayerId == this.playerId) {
+            //console.log("cardReserve ----> " + cardReserve);
             var fileName = cardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "file").attributeValue;
-            console.log("fileName ----> " + fileName);
+            //console.log("fileName ----> " + fileName);
             this.myCardReserve = cardReserve;
-            this.isMyCardReserveSelected = true;
             return fileName;
         }
         else {

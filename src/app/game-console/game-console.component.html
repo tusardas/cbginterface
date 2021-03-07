@@ -4,19 +4,45 @@
     <ng-template #gameBlock>
         <div>
             <div class="cardSection">
-                <ul class="myCards" *ngFor="let cardReserve of cardReserves">
+                <ul class="myCards" *ngFor="let cardReserve of cardReservesPlayable">
                     <li>
                         <a href="javascript:void(0);" (click)="selectCard(cardReserve)">
-                            <img src="http://localhost:8888/images/cards/{{getFile(cardReserve)}}"/>
+                            <img src="{{fileUrl}}/{{getFile(cardReserve)}}"/>
                         </a>
                     </li>
                 </ul>
             </div>
+            <div *ngIf="cardReservesJustWon.length > 0; then myJustWonBlock; else nothingWonYet"></div>
+            <ng-template #myJustWonBlock>
+                You have won another {{cardReservesJustWon.length}} card(s) which will be available for play when your current lot is done.
+            </ng-template>
+            <ng-template #nothingWonYet>
+                You are yet to win cards.
+            </ng-template>
+
+            <div class="placedCards" >
+                <ul class="myCards" *ngFor="let turn of turns">
+                    <li *ngIf="(turn.playerId == playerId); then myCard; else hisCard">
+                        <ng-template #myCard>
+                            My card
+                        </ng-template>
+                        <ng-template #hisCard>
+                            His card
+                        </ng-template>
+                    </li>
+                </ul>
+
+                <div class="divider">VS</div>
+
+            </div>
+
+
+            <!--
             <div class="placedCards">
                 <div class="myCard">
                     <div *ngIf="isMyCardReserveSelected; then myCardReserveBlock; else thinkingBlock"></div>
                     <ng-template #myCardReserveBlock>
-                        <img src="http://localhost:8888/images/cards/{{getFile(myCardReserve)}}"/>
+                        <img src="{{fileUrl}}/{{getFile(myCardReserve)}}"/>
                     </ng-template>
                     <ng-template #thinkingBlock>
                         <span *ngIf="(gameStatus !=3 && nextPlayerId == playerId); then thinking; else waiting"></span>
@@ -32,7 +58,7 @@
                 <div class="hisCard">
                     <div *ngIf="isHisCardReserveSelected; then hisCardReserveBlock; else heThinkingBlock"></div>
                     <ng-template #hisCardReserveBlock>
-                        <img src="http://localhost:8888/images/cards/{{getFile(hisCardReserve)}}"/>
+                        <img src="{{fileUrl}}/{{getFile(hisCardReserve)}}"/>
                     </ng-template>
                     <ng-template #heThinkingBlock>
                         <span *ngIf="(gameStatus !=3 && nextPlayerId != playerId); then hethinking; else hewaiting"></span>
@@ -45,14 +71,17 @@
                     </ng-template>
                 </div>
             </div>
-            <div *ngIf="(gameStatus !=3 && nextPlayerId == playerId); then canPlay; else cannotPlay"></div>
+            -->
+            <div *ngIf="(game.gameStatus !=3 && round.nextPlayerId == playerId); then canPlay; else cannotPlay"></div>
             <ng-template #canPlay>
                 <div class="gameButtons">
                     <button (click)="playTurn()">Play Turn</button>
+                    <button (click)="checkIfGameExists()">Refresh</button>
                 </div>
             </ng-template>
             <ng-template #cannotPlay>
                 <div class="gameButtons">
+                    <button (click)="checkIfGameExists()">Refresh</button>
                     Please wait for your turn
                 </div>
             </ng-template>
