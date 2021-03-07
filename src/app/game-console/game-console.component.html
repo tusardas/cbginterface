@@ -4,36 +4,51 @@
     <ng-template #gameBlock>
         <div>
             <div class="cardSection">
-                <ul class="myCards" *ngFor="let cardReserve of cardReservesPlayable">
-                    <li>
+                <ul class="myCards" >
+                    <li *ngFor="let cardReserve of cardReservesPlayable">
                         <a href="javascript:void(0);" (click)="selectCard(cardReserve)">
                             <img src="{{fileUrl}}/{{getFile(cardReserve)}}"/>
                         </a>
                     </li>
+                    <li *ngIf="cardReservesJustWon.length > 0; then myJustWonBlock; else nothingWonYet"></li>
+                    <ng-template #myJustWonBlock>
+                        <li>
+                            You have won another {{cardReservesJustWon.length}} card(s) 
+                            which will be available for play when your current lot is done.
+                        </li>
+                    </ng-template>
+                    <ng-template #nothingWonYet>
+                        <li>
+                            You are yet to win cards.
+                        </li>
+                    </ng-template>
                 </ul>
             </div>
-            <div *ngIf="cardReservesJustWon.length > 0; then myJustWonBlock; else nothingWonYet"></div>
-            <ng-template #myJustWonBlock>
-                You have won another {{cardReservesJustWon.length}} card(s) which will be available for play when your current lot is done.
-            </ng-template>
-            <ng-template #nothingWonYet>
-                You are yet to win cards.
-            </ng-template>
 
             <div class="placedCards" >
-                <ul class="myCards" *ngFor="let turn of turns">
-                    <li *ngIf="(turn.playerId == playerId); then myCard; else hisCard">
+                <ul class="myCards" >
+                    <li *ngFor="let turn of turns">
+                        <span *ngIf="(turn.playerId == playerId); then myCard; else hisCard"></span>
                         <ng-template #myCard>
-                            My card
+                            <span *ngIf="turn.isPlayed; then showCard; else myPending"></span>
+                        </ng-template>
+                        <ng-template #myPending>
+                            <span *ngIf="(myCardReserve != undefined); then mySelectedCard; else pending"></span>
+                        </ng-template>
+                        <ng-template #mySelectedCard>
+                            <img src="{{fileUrl}}/{{getFile(myCardReserve)}}"/>
                         </ng-template>
                         <ng-template #hisCard>
-                            His card
+                            <span *ngIf="turn.isPlayed; then showCard; else pending"></span>
+                        </ng-template>
+                        <ng-template #showCard>
+                            <img src="{{fileUrl}}/{{getFileByTurn(turn)}}"/>
+                        </ng-template>
+                        <ng-template #pending>
+                            Pending...
                         </ng-template>
                     </li>
                 </ul>
-
-                <div class="divider">VS</div>
-
             </div>
 
 
@@ -76,12 +91,11 @@
             <ng-template #canPlay>
                 <div class="gameButtons">
                     <button (click)="playTurn()">Play Turn</button>
-                    <button (click)="checkIfGameExists()">Refresh</button>
+                    
                 </div>
             </ng-template>
             <ng-template #cannotPlay>
                 <div class="gameButtons">
-                    <button (click)="checkIfGameExists()">Refresh</button>
                     Please wait for your turn
                 </div>
             </ng-template>
@@ -92,6 +106,9 @@
             <button (click)="saveNewGame()">New Game</button>
         </div>
     </ng-template>
+    <div>
+        <button (click)="checkIfGameExists()">Refresh</button>
+    </div>
     
 </div>
 

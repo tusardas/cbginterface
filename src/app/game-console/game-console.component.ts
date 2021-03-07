@@ -16,10 +16,14 @@ export class GameConsoleComponent implements OnInit {
     public cardReservesJustWon;
     public fileUrl:string = "";
     public isGameLoaded:Boolean = false;
-    public myCardReserve;
+    public myCardReserve = undefined;
 
   constructor(private _GameService : GameService, private _UrlService:UrlService) { 
-
+    if(!this._GameService.getPlayerId()) {
+        this._GameService.setSessionId(localStorage.getItem("sessionId"));
+        this._GameService.setPlayerId(localStorage.getItem("playerId"));
+        this.playerId = this._GameService.getPlayerId();
+    }
   }
 
     ngOnInit(): void {
@@ -34,6 +38,11 @@ export class GameConsoleComponent implements OnInit {
                 data => this.loadGame(data),
                 error => console.log(error)
             );
+    }
+
+    playedTurnSuccess(responseData:any) : void {
+        this.myCardReserve = undefined;
+        this.loadGame(responseData);
     }
 
     loadGame(responseData:any) : void {
@@ -105,18 +114,17 @@ export class GameConsoleComponent implements OnInit {
     getFileByTurn(turn:any) {
         let cardReserveForTurn;
         let gamePlayers = this.game.gamePlayers;
-        for(let i = 0; i<gamePlayers.length(); i++) {
+        for(let i = 0; i<gamePlayers.length; i++) {
             let cardReserves = gamePlayers[i].cardReserves;
-            for(let j=0; cardReserves.length; j++) {
-                if(cardReserves[j].card.id == turn.cardId) {
-                    cardReserveForTurn = cardReserves[j];
-                    break;
-                }
-            }
+            console.log("cardReserves.length -------> " + cardReserves.length);
+            
+            cardReserveForTurn = cardReserves.find(cardReserve => cardReserve.card.id === turn.cardId);
             if(cardReserveForTurn != undefined) {
                 break;
             }
+            
         }
+        console.log("cardReserveForTurn -------> " + cardReserveForTurn);
         return this.getFile(cardReserveForTurn);
     }
 

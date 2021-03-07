@@ -43,6 +43,8 @@ export class LoginComponent implements OnInit {
           //redirect
         this._GameService.setSessionId(data.sessionId);
         this._GameService.setPlayerId(data.playerId);
+        localStorage.setItem("sessionId", data.sessionId);
+        localStorage.setItem("playerId", data.playerId);
         this._Router.navigate(["/game-console"]);
         
       }
