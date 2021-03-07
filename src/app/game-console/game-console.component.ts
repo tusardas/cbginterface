@@ -91,7 +91,7 @@ export class GameConsoleComponent implements OnInit {
                 let myCardAttribute = this.myCardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "odi_runs");
                 this._GameService.playTurn(this.playerId, this.myCardReserve, myCardAttribute)
                     .subscribe(
-                        data => this.loadGame(data),
+                        data => this.playedTurnSuccess(data),
                         error => console.log(error)
                     );
             }
