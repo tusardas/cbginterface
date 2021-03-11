@@ -60,3 +60,17 @@ ul.myCards > li > img {
     clear: both;
     text-align: center;
 }
+.selectStateModalContent {
+    display: grid;
+    grid-template-columns: 2fr 5fr;
+    grid-column-gap: 10px;
+}
+.modal-content {
+    width:50%;
+}
+.playerNameAndCountry {
+    text-align: center;
+}
+.displayStats {
+    list-style: none;
+}

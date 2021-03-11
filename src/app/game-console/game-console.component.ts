@@ -17,6 +17,12 @@ export class GameConsoleComponent implements OnInit {
     public fileUrl:string = "";
     public isGameLoaded:Boolean = false;
     public myCardReserve = undefined;
+    public myCardAttribute = undefined;
+    public displayName = undefined;
+    public displayCountry = undefined;
+    public displayStats = undefined;
+    public winnerPlayerName = undefined;
+    public showNewGameLink = false;
 
   constructor(private _GameService : GameService, private _UrlService:UrlService) { 
     if(!this._GameService.getPlayerId()) {
@@ -42,29 +48,53 @@ export class GameConsoleComponent implements OnInit {
 
     playedTurnSuccess(responseData:any) : void {
         this.myCardReserve = undefined;
+        this.myCardAttribute = undefined;
+        this.displayName = undefined;
+        this.displayCountry = undefined;
+        this.displayStats = undefined;
+
+        this.hideSelectStatModal();
         this.loadGame(responseData);
     }
 
     loadGame(responseData:any) : void {
-        let game = responseData.game;
-        let round = responseData.round;
-        //console.log("game -------> " + game.id);
-        //console.log("round -------> " + round.id);
-        if(game.id && round.id) {
-            //console.log("inside ------>");
+        if(responseData != null) {
+            let game = responseData.game;
+            let round = responseData.round;
             this.game = game;
-            this.round = round;
-            this.turns = round.turns;
-
-            let cardReserves = game.gamePlayers.find(gamePlayer => gamePlayer.player.id == this.playerId).cardReserves;
-            this.cardReservesPlayable = this.filterCardReserves(cardReserves, 1);
-            //console.log("useable -----> " + this.cardReservesPlayable);
-            this.cardReservesJustWon = this.filterCardReserves(cardReserves, 2);
-            //console.log("justWon -----> " + this.cardReservesJustWon);
             
-            this.isGameLoaded = true;
+            console.log("game -------> " + game.id);
+            //console.log("round -------> " + round.id);
+            if(game.id && game.gameState.gameStatus === 3) {
+                this.myCardAttribute = undefined;
+                let winnerPlayerId = game.winnerPlayerId;
+                this.winnerPlayerName = game.gamePlayers.find(gamePlayerTemp => gamePlayerTemp.player.id == winnerPlayerId).player.displayName;
+                this.showNewGameLink = true;
+                this.isGameLoaded = true;
+            }
+            else if(game.id && round.id) {
+                //console.log("inside ------>");
+                this.round = round;
+                this.turns = round.turns;
+                let cardReserves = game.gamePlayers.find(gamePlayer => gamePlayer.player.id == this.playerId).cardReserves;
+                this.cardReservesPlayable = this.filterCardReserves(cardReserves, 1);
+                //console.log("useable -----> " + this.cardReservesPlayable);
+                this.cardReservesJustWon = this.filterCardReserves(cardReserves, 2);
+                //console.log("justWon -----> " + this.cardReservesJustWon);
+                
+                if(this.round.attributeKey !== null) {
+                    this.myCardAttribute = this.round.attributeKey;
+                }
+                else {
+                    this.myCardAttribute = undefined;
+                }
+                this.winnerPlayerName = undefined;
+                this.isGameLoaded = true;
+            }
         }
-        //console.log("game -------> " + this.game.id);
+        else {
+            this.showNewGameLink = true;
+        }
     }
 
     filterCardReserves(cardReserves:any, reserveType:any) : any {
@@ -88,19 +118,24 @@ export class GameConsoleComponent implements OnInit {
     playTurn() : void {
         if(this.game.gameStatus !=3 && this.round.nextPlayerId == this.playerId) {
             if(this.myCardReserve != undefined) {
-                let myCardAttribute = this.myCardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "odi_runs");
-                this._GameService.playTurn(this.playerId, this.myCardReserve, myCardAttribute)
-                    .subscribe(
-                        data => this.playedTurnSuccess(data),
-                        error => console.log(error)
-                    );
+                if(this.myCardAttribute != undefined) {
+                    let selectedCardAttribute = this.myCardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === this.myCardAttribute);
+                    this._GameService.playTurn(this.playerId, this.myCardReserve, selectedCardAttribute)
+                        .subscribe(
+                            data => this.playedTurnSuccess(data),
+                            error => console.log(error)
+                        );
+                }
+                else {
+                    this.showError("Please select a stat");
+                }
             }
             else {
-                this.showError("Please select your card first!");
+                this.showError("Please select a card");
             }
         }
         else {
-            this.showError("Please wait for your turn!");
+            this.showError("Please wait for your turn");
         }
     }
 
@@ -130,10 +165,32 @@ export class GameConsoleComponent implements OnInit {
 
     selectCard(cardReserve:any) : string {
         if(this.game.gameStatus !=3 && this.round.nextPlayerId == this.playerId) {
-            //console.log("cardReserve ----> " + cardReserve);
-            var fileName = cardReserve.card.cardAttributes.find(cardAttribute => cardAttribute.attributeKey === "file").attributeValue;
-            //console.log("fileName ----> " + fileName);
+            let fileName = undefined;
             this.myCardReserve = cardReserve;
+            this.displayStats = new Array();
+            let gameFormat = this.game.gameSettings.gameFormat.toLowerCase();
+            cardReserve.card.cardAttributes.forEach(cardAttribute => {
+                let attributeKey = cardAttribute.attributeKey;
+                let attributeValue = cardAttribute.attributeValue;
+                if(attributeKey == "file") {
+                    fileName = attributeValue;
+                }
+                else if(attributeKey == "name") {
+                    this.displayName = attributeValue;
+                }
+                else if(attributeKey == "country") {
+                    this.displayCountry = attributeValue;
+                }
+                else if(attributeKey.indexOf(gameFormat) === 0) {
+                    let isSelected = this.round.attributeKey == attributeKey
+                    this.displayStats.push({
+                        "attributeKey" : attributeKey,
+                        "attributeKeyDisplay" : attributeKey,
+                        "attributeValue" : attributeValue,
+                        "isSelected" : isSelected
+                    });
+                }
+            });
             return fileName;
         }
         else {
@@ -143,6 +200,38 @@ export class GameConsoleComponent implements OnInit {
 
     showError(errorMsg:string) : void {
         alert(errorMsg);
+    }
+
+    showSelectStatModal() {
+        if(this.game.gameStatus !=3 && this.round.nextPlayerId == this.playerId) {
+            if(this.myCardReserve != undefined) {
+                var modal = document.getElementById("selectStateModal");
+                modal.style.display = "block";
+            }
+            else {
+                this.showError("Please select your card first!");
+            }
+        }
+        else {
+            this.showError("Please wait for your turn!");
+        }
+    }
+
+    hideSelectStatModal() {
+        var modal = document.getElementById("selectStateModal");
+        modal.style.display = "none";
+
+    }
+
+    selectAttribute(event, attributeKey) {
+        let attributeKeyForRound = this.round.attributeKey;
+        if(attributeKeyForRound === null) {
+            this.myCardAttribute = attributeKey;
+        }
+        else{
+            this.showError("State for this round locked to: " + attributeKeyForRound);
+            return false;
+        }        
     }
 
 }

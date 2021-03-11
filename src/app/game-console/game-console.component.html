@@ -1,8 +1,7 @@
 <div>
     
-    <div *ngIf="isGameLoaded; then gameBlock; else gameStartBlock "></div>
-    <ng-template #gameBlock>
-        <div>
+    <div *ngIf="isGameLoaded">
+        <div *ngIf="game.gameState.gameStatus != 3">
             <div class="cardSection">
                 <ul class="myCards" >
                     <li *ngFor="let cardReserve of cardReservesPlayable">
@@ -51,47 +50,10 @@
                 </ul>
             </div>
 
-
-            <!--
-            <div class="placedCards">
-                <div class="myCard">
-                    <div *ngIf="isMyCardReserveSelected; then myCardReserveBlock; else thinkingBlock"></div>
-                    <ng-template #myCardReserveBlock>
-                        <img src="{{fileUrl}}/{{getFile(myCardReserve)}}"/>
-                    </ng-template>
-                    <ng-template #thinkingBlock>
-                        <span *ngIf="(gameStatus !=3 && nextPlayerId == playerId); then thinking; else waiting"></span>
-                        <ng-template #thinking>
-                            <span>Im' Thinking...</span>
-                        </ng-template>
-                        <ng-template #waiting>
-                            <span>I'm Waiting...</span>
-                        </ng-template>
-                    </ng-template>
-                </div>
-                <div class="divider">VS</div>
-                <div class="hisCard">
-                    <div *ngIf="isHisCardReserveSelected; then hisCardReserveBlock; else heThinkingBlock"></div>
-                    <ng-template #hisCardReserveBlock>
-                        <img src="{{fileUrl}}/{{getFile(hisCardReserve)}}"/>
-                    </ng-template>
-                    <ng-template #heThinkingBlock>
-                        <span *ngIf="(gameStatus !=3 && nextPlayerId != playerId); then hethinking; else hewaiting"></span>
-                        <ng-template #hethinking>
-                            <span>He's Thinking...</span>
-                        </ng-template>
-                        <ng-template #hewaiting>
-                            <span>He's Waiting...</span>
-                        </ng-template>
-                    </ng-template>
-                </div>
-            </div>
-            -->
             <div *ngIf="(game.gameStatus !=3 && round.nextPlayerId == playerId); then canPlay; else cannotPlay"></div>
             <ng-template #canPlay>
                 <div class="gameButtons">
-                    <button (click)="playTurn()">Play Turn</button>
-                    
+                    <button (click)="showSelectStatModal()">Select Stat</button>
                 </div>
             </ng-template>
             <ng-template #cannotPlay>
@@ -100,16 +62,55 @@
                 </div>
             </ng-template>
         </div>
-    </ng-template>
-    <ng-template #gameStartBlock>
+        <div *ngIf="(game.gameState.gameStatus == 3)">
+            Game over; winner = {{winnerPlayerName}}
+        </div>
+    </div>
+    <div *ngIf="showNewGameLink">
         <div>
             <button (click)="saveNewGame()">New Game</button>
         </div>
-    </ng-template>
+    </div>
     <div>
         <button (click)="checkIfGameExists()">Refresh</button>
     </div>
     
+    
+    <div id="selectStateModal" class="modal">
+        <div class="modal-content">
+            <span class="close" (click)="hideSelectStatModal()">&times;</span>
+            <div class="selectStateModalContent" *ngIf="(myCardReserve != undefined)">
+                <div class="selectStateModalCard">
+                    <div>
+                        <img src="{{fileUrl}}/{{getFile(myCardReserve)}}"/>
+                    </div>
+                    <div class="playerNameAndCountry">
+                        {{displayName}} ({{displayCountry}})
+                    </div>
+                </div>
+                <div class="selectStateModalCardAtrributes">
+                    <div>
+                        <ul class="displayStats">
+                            <li *ngFor="let displayStat of displayStats">
+                                <span>
+                                    <input type="radio" name="selectStat" 
+                                        value="{{displayStat.attributeKey}}" 
+                                        (click)="selectAttribute($event, displayStat.attributeKey)"
+                                        [checked]="displayStat.isSelected"
+                                    />
+                                    {{displayStat.attributeKeyDisplay}}: {{displayStat.attributeValue}}
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <button (click)="playTurn()">Play Turn</button>
+                    </div>                   
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 
